@@ -106,6 +106,12 @@
     for (var i = 0; i < buttons.length; i++) {
       buttons[i].addEventListener('click', function (event) {
         applyLang(event.currentTarget.getAttribute('data-lang-btn'));
+        var navEl = document.getElementById('siteNav');
+        var toggleEl = document.getElementById('navToggle');
+        if (navEl && toggleEl && navEl.classList.contains('is-open')) {
+          navEl.classList.remove('is-open');
+          toggleEl.setAttribute('aria-expanded', 'false');
+        }
       });
     }
 

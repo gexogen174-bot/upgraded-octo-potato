@@ -57,3 +57,15 @@ assert.ok(!css.includes('@import'), 'styles.css must not @import remote CSS');
 assert.ok(!/url\(\s*['"]?https?:/i.test(css), 'styles.css must not reference remote URLs');
 
 console.log(`OK: ${payload.LOCALES.length} locales, ${keySets[0].length} keys each, hardened static shell.`);
+
+assert.ok(html.includes('name="viewport"'), 'responsive viewport meta tag missing');
+assert.ok(html.includes('width=device-width'), 'viewport must cover device width');
+assert.ok(css.includes('-webkit-text-size-adjust'), 'mobile text-size guard missing');
+assert.ok(css.includes('touch-action: manipulation'), 'tap-delay guard missing');
+for (const need of ['max-width: 960px', 'max-width: 400px', 'pointer: coarse']) {
+  assert.ok(css.includes(need), `styles.css must cover ${need}`);
+}
+for (const need of ['80dvh', 'overflow-x: clip', 'scroll-padding-top: calc(4.5rem']) {
+  assert.ok(css.includes(need), `styles.css must include ${need}`);
+}
+assert.ok(fs.readFileSync(path.join(root, 'app.js'), 'utf8').includes('classList.contains'), 'app.js must close the menu after a language pick');
