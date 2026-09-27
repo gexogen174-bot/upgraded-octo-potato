@@ -1,17 +1,17 @@
 'use strict';
-/* Language switcher + calculator. Only same-origin static scripts run
-   (see CSP). All user input is treated as hostile: strict allow-lists,
-   finite-number parsing with bounds, and textContent-only rendering. */
+/* Hexlock Trade Group — language switcher + page interactions.
+   Only same-origin static scripts run (see CSP). All user input is
+   treated as hostile: length caps, encodeURIComponent mailto links,
+   validated fact indexes, and textContent-only rendering. */
 (function () {
-  var LOCALES = ["en", "ru", "zh", "es"];
-  var FORM_LOCALES = { en: "en-US", ru: "ru-RU", zh: "zh-CN", es: "es-ES" };
-  var CURRENCY = "USD";
-  var WEIGHT_MIN = 0.1, WEIGHT_MAX = 30000;
-  var DIST_MIN = 1, DIST_MAX = 20000;
-  var STORE_KEY = "hexlock-lang";
-  var TYPES = ["standard", "express", "fragile"];
+  var LOCALES = ['ru', 'en', 'zh', 'es'];
+  var FALLBACK = 'ru';
+  var STORE_KEY = 'hexlock-lang';
+  var FACT_COUNT = 6;
+  var MAX_SHORT = 200;
+  var MAX_COMMENT = 1000;
 
-  function dict() {
+  function dicts() {
     return (window.I18N && window.I18N.STRINGS) || {};
   }
 
@@ -21,131 +21,173 @@
 
   function detectLang() {
     try {
-      var fromUrl = new URLSearchParams(window.location.search).get("lang");
+      var fromUrl = new URLSearchParams(window.location.search).get('lang');
       if (isLocale(fromUrl)) return fromUrl;
     } catch (e) { /* URL API unavailable: ignore */ }
     try {
       var stored = window.localStorage.getItem(STORE_KEY);
       if (isLocale(stored)) return stored;
     } catch (e) { /* storage blocked: ignore */ }
-    var nav = String(navigator.language || "en").toLowerCase();
-    if (nav.indexOf("zh") === 0) return "zh";
-    if (nav.indexOf("ru") === 0) return "ru";
-    if (nav.indexOf("es") === 0) return "es";
-    return "en";
+    var nav = String((typeof navigator !== 'undefined' && navigator.language) || FALLBACK).toLowerCase();
+    if (nav.indexOf('zh') === 0) return 'zh';
+    if (nav.indexOf('en') === 0) return 'en';
+    if (nav.indexOf('es') === 0) return 'es';
+    return 'ru';
   }
 
   var current = detectLang();
 
   function t(key) {
-    var d = dict();
-    if (d[current] && typeof d[current][key] === "string") return d[current][key];
-    if (d.en && typeof d.en[key] === "string") return d.en[key];
-    return "";
+    var d = dicts();
+    if (d[current] && typeof d[current][key] === 'string') return d[current][key];
+    if (d[FALLBACK] && typeof d[FALLBACK][key] === 'string') return d[FALLBACK][key];
+    return '';
   }
 
-  var resultEl, weightEl, distEl, typeEl;
-
-  function showIdle() {
-    resultEl.classList.remove("is-error");
-    resultEl.textContent = t("result_idle");
+  function cap(value, max) {
+    var s = String(value == null ? '' : value);
+    return s.length > max ? s.slice(0, max) : s;
   }
 
-  function showError(message) {
-    resultEl.classList.add("is-error");
-    resultEl.textContent = message;
-  }
+  var factText = null;
 
   function applyLang(lang) {
     if (!isLocale(lang)) return;
     current = lang;
-    var strings = dict()[lang] || {};
-    document.documentElement.setAttribute("lang", lang);
-    var nodes = document.querySelectorAll("[data-i18n]");
+    var strings = dicts()[lang] || {};
+    document.documentElement.setAttribute('lang', lang);
+    var nodes = document.querySelectorAll('[data-i18n]');
     for (var i = 0; i < nodes.length; i++) {
-      var key = nodes[i].getAttribute("data-i18n");
-      if (typeof strings[key] === "string") nodes[i].textContent = strings[key];
+      var key = nodes[i].getAttribute('data-i18n');
+      if (typeof strings[key] === 'string') nodes[i].textContent = strings[key];
     }
-    if (typeof strings.meta_title === "string") document.title = strings.meta_title;
-    var buttons = document.querySelectorAll("[data-lang-btn]");
-    for (var j = 0; j < buttons.length; j++) {
-      buttons[j].setAttribute(
-        "aria-pressed",
-        buttons[j].getAttribute("data-lang-btn") === lang ? "true" : "false"
+    var phs = document.querySelectorAll('[data-i18n-ph]');
+    for (var p = 0; p < phs.length; p++) {
+      var pk = phs[p].getAttribute('data-i18n-ph');
+      if (typeof strings[pk] === 'string') phs[p].setAttribute('placeholder', strings[pk]);
+    }
+    var arias = document.querySelectorAll('[data-i18n-aria]');
+    for (var a = 0; a < arias.length; a++) {
+      var ak = arias[a].getAttribute('data-i18n-aria');
+      if (typeof strings[ak] === 'string') arias[a].setAttribute('aria-label', strings[ak]);
+    }
+    var metas = document.querySelectorAll('[data-i18n-content]');
+    for (var m = 0; m < metas.length; m++) {
+      var mk = metas[m].getAttribute('data-i18n-content');
+      if (typeof strings[mk] === 'string') metas[m].setAttribute('content', strings[mk]);
+    }
+    if (typeof strings.meta_title === 'string') document.title = strings.meta_title;
+    var buttons = document.querySelectorAll('[data-lang-btn]');
+    for (var b = 0; b < buttons.length; b++) {
+      buttons[b].setAttribute(
+        'aria-pressed',
+        buttons[b].getAttribute('data-lang-btn') === lang ? 'true' : 'false'
       );
     }
     try {
       window.localStorage.setItem(STORE_KEY, lang);
     } catch (e) { /* storage blocked: language just won't persist */ }
-    if (resultEl) showIdle();
+    if (factText) factText.textContent = t('fact_0');
   }
 
-  // Strict number parsing: finite values only, comma decimal supported
-  // ("0,5" -> 0.5). Anything else (NaN, Infinity, hex tricks) is rejected.
-  function toNumber(raw) {
-    var s = String(raw == null ? "" : raw).trim();
-    if (s === "") return null;
-    if (/^\d+,\d+$/.test(s)) s = s.replace(",", ".");
-    if (!/^[+-]?(\d+(\.\d+)?|\.\d+)([eE][+-]?\d+)?$/.test(s)) return null;
-    var value = Number(s);
-    return Number.isFinite(value) ? value : null;
-  }
-
-  function estimate(weight, distance, type) {
-    var coeff = type === "express" ? 1.6 : type === "fragile" ? 1.25 : 1;
-    return (50 + weight * 1.2 + distance * 0.35) * coeff;
-  }
-
-  function formatPrice(value) {
-    try {
-      return new Intl.NumberFormat(FORM_LOCALES[current], {
-        style: "currency",
-        currency: CURRENCY
-      }).format(value);
-    } catch (e) {
-      return value.toFixed(2) + " " + CURRENCY;
-    }
-  }
-
-  function onSubmit(event) {
-    event.preventDefault();
-    var weight = toNumber(weightEl.value);
-    var distance = toNumber(distEl.value);
-    var type = TYPES.indexOf(typeEl.value) !== -1 ? typeEl.value : "standard";
-    if (weight === null || weight < WEIGHT_MIN || weight > WEIGHT_MAX) {
-      showError(t("error_weight"));
-      return;
-    }
-    if (distance === null || distance < DIST_MIN || distance > DIST_MAX) {
-      showError(t("error_distance"));
-      return;
-    }
-    // {price} is replaced with a server-independent formatted number we
-    // generated ourselves; never with raw user input.
-    var text = t("result_text").split("{price}").join(formatPrice(estimate(weight, distance, type)));
-    resultEl.classList.remove("is-error");
-    resultEl.textContent = text;
+  function setActive(i) {
+    if (!factText) return;
+    if (i < 0 || i >= FACT_COUNT) return;
+    var text = t('fact_' + i);
+    factText.style.opacity = 0;
+    setTimeout(function () {
+      factText.textContent = text;
+      factText.style.opacity = 1;
+    }, 150);
   }
 
   function init() {
-    resultEl = document.getElementById("result");
-    weightEl = document.getElementById("weight");
-    distEl = document.getElementById("distance");
-    typeEl = document.getElementById("ctype");
-    var form = document.getElementById("calc-form");
-    if (!resultEl || !weightEl || !distEl || !typeEl || !form) return;
-    var buttons = document.querySelectorAll("[data-lang-btn]");
+    var buttons = document.querySelectorAll('[data-lang-btn]');
     for (var i = 0; i < buttons.length; i++) {
-      buttons[i].addEventListener("click", function (event) {
-        applyLang(event.currentTarget.getAttribute("data-lang-btn"));
+      buttons[i].addEventListener('click', function (event) {
+        applyLang(event.currentTarget.getAttribute('data-lang-btn'));
       });
     }
-    form.addEventListener("submit", onSubmit);
+
+    var toggle = document.getElementById('navToggle');
+    var nav = document.getElementById('siteNav');
+    if (toggle && nav) {
+      toggle.addEventListener('click', function () {
+        var open = nav.classList.toggle('is-open');
+        toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+      var links = nav.querySelectorAll('a');
+      for (var l = 0; l < links.length; l++) {
+        links[l].addEventListener('click', function () {
+          nav.classList.remove('is-open');
+          toggle.setAttribute('aria-expanded', 'false');
+        });
+      }
+    }
+
+    var hero = document.getElementById('heroSection');
+    var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var canHover = window.matchMedia && window.matchMedia('(hover: hover)').matches;
+    if (hero && !reduceMotion && canHover) {
+      hero.addEventListener('pointermove', function (e) {
+        var r = hero.getBoundingClientRect();
+        if (r.width > 0 && r.height > 0) {
+          hero.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%');
+          hero.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100) + '%');
+        }
+      });
+    }
+
+    factText = document.getElementById('factText');
+    var dots = document.querySelectorAll('.fact-node');
+    for (var n = 0; n < dots.length; n++) {
+      (function (v) {
+        var idx = parseInt(v.getAttribute('data-fact-index'), 10);
+        if (!isFinite(idx) || idx < 0 || idx >= FACT_COUNT) return;
+        v.addEventListener('mouseenter', function () { setActive(idx); });
+        v.addEventListener('click', function () { setActive(idx); });
+        v.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActive(idx); }
+        });
+      })(dots[n]);
+    }
+
+    var faqs = document.querySelectorAll('.faq-question');
+    for (var f = 0; f < faqs.length; f++) {
+      faqs[f].addEventListener('click', function (event) {
+        var btn = event.currentTarget;
+        var expanded = btn.getAttribute('aria-expanded') === 'true';
+        var answer = btn.nextElementSibling;
+        btn.setAttribute('aria-expanded', String(!expanded));
+        if (answer) answer.style.maxHeight = expanded ? '' : (answer.scrollHeight + 'px');
+      });
+    }
+
+    var calcSubmit = document.getElementById('calcSubmit');
+    if (calcSubmit) {
+      calcSubmit.addEventListener('click', function () {
+        var category = cap(document.getElementById('calcCategory').value, MAX_SHORT);
+        var volume = cap(document.getElementById('calcVolume').value, MAX_SHORT).trim();
+        var origin = cap(document.getElementById('calcOrigin').value, MAX_SHORT).trim();
+        var destination = cap(document.getElementById('calcDestination').value, MAX_SHORT).trim();
+        var comment = cap(document.getElementById('calcComment').value, MAX_COMMENT).trim();
+        var lines = [t('mail_line'), ''];
+        if (category) lines.push(t('mail_cat') + ': ' + category);
+        if (volume) lines.push(t('mail_vol') + ': ' + volume);
+        if (origin) lines.push(t('mail_origin') + ': ' + origin);
+        if (destination) lines.push(t('mail_dest') + ': ' + destination);
+        if (comment) lines.push(t('mail_comment') + ': ' + comment);
+        var body = lines.join('\n');
+        window.location.href = 'mailto:info@hexlock.pro?subject=' +
+          encodeURIComponent(t('mail_subject')) + '&body=' + encodeURIComponent(body);
+      });
+    }
+
     applyLang(current);
   }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
   } else {
     init();
   }

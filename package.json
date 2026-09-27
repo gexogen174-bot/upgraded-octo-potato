@@ -2,7 +2,7 @@
   "name": "hexlock-trade-group",
   "version": "1.0.0",
   "private": true,
-  "description": "Static multilingual landing page with cargo calculator (EN/RU/ZH/ES). No dependencies.",
+  "description": "Static multilingual landing page (RU/EN/ZH/ES) with logistics estimate form. No dependencies.",
   "scripts": {
     "dev": "python3 -m http.server 8000",
     "test": "node tests/i18n.test.cjs"
