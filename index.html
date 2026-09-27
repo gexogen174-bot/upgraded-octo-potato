@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hexlock Trade Group — Cargo Delivery Calculator</title>
+  <meta name="description" content="Hexlock Trade Group: international freight forwarding with an instant delivery cost calculator. Available in English, Russian, Chinese and Spanish.">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="theme-color" content="#0f2a43">
+  <!-- Fallback for hosts that do not send the _headers security headers.
+       Primary protection comes from HTTP response headers (see _headers). -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; upgrade-insecure-requests">
+  <link rel="stylesheet" href="styles.css">
+  <script src="i18n.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#calculator">Skip to calculator</a>
+  <header class="site-header">
+    <div class="wrap header-row">
+      <p class="brand">Hexlock Trade Group</p>
+      <nav aria-label="Main">
+        <ul class="nav">
+          <li><a href="#services" data-i18n="nav_services">Services</a></li>
+          <li><a href="#calculator" data-i18n="nav_calculator">Calculator</a></li>
+          <li><a href="#contacts" data-i18n="nav_contacts">Contacts</a></li>
+        </ul>
+      </nav>
+      <div class="lang" role="group" aria-label="Language selector">
+        <span class="lang-label" data-i18n="lang_label">Language:</span>
+        <button type="button" data-lang-btn="en" aria-pressed="true">English</button>
+        <button type="button" data-lang-btn="ru" aria-pressed="false">Русский</button>
+        <button type="button" data-lang-btn="zh" aria-pressed="false">中文</button>
+        <button type="button" data-lang-btn="es" aria-pressed="false">Español</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap">
+        <p class="badge" data-i18n="hero_badge">International freight forwarding</p>
+        <h1 data-i18n="hero_title">Cargo delivery, calculated in a minute</h1>
+        <p class="lead" data-i18n="hero_subtitle">Enter weight, distance and delivery type — get an instant estimate. No registration, your data never leaves your browser.</p>
+        <p class="cta-row">
+          <a class="btn" href="#calculator" data-i18n="hero_cta_calc">Calculate shipping</a>
+          <a class="btn btn-ghost" href="#contacts" data-i18n="hero_cta_contact">Contact us</a>
+        </p>
+      </div>
+    </section>
+
+    <section id="calculator" class="wrap card">
+      <h2 data-i18n="calc_title">Delivery cost calculator</h2>
+      <p class="muted" data-i18n="calc_desc">All calculations run locally in your browser. Nothing is sent to any server.</p>
+      <form id="calc-form" action="#" method="get">
+        <div class="field">
+          <label for="weight" data-i18n="weight_label">Cargo weight (kg)</label>
+          <input type="number" id="weight" name="weight" min="0.1" max="30000" step="any" inputmode="decimal" required autocomplete="off">
+          <small data-i18n="weight_hint">From 0.1 to 30,000 kg</small>
+        </div>
+        <div class="field">
+          <label for="distance" data-i18n="distance_label">Distance (km)</label>
+          <input type="number" id="distance" name="distance" min="1" max="20000" step="any" inputmode="decimal" required autocomplete="off">
+          <small data-i18n="distance_hint">From 1 to 20,000 km</small>
+        </div>
+        <div class="field">
+          <label for="ctype" data-i18n="type_label">Delivery type</label>
+          <select id="ctype" name="ctype">
+            <option value="standard" data-i18n="type_standard">Standard</option>
+            <option value="express" data-i18n="type_express">Express</option>
+            <option value="fragile" data-i18n="type_fragile">Fragile goods</option>
+          </select>
+        </div>
+        <button class="btn" type="submit" data-i18n="calc_submit">Calculate</button>
+      </form>
+      <p id="result" class="result" role="status" aria-live="polite" data-i18n="result_idle">Enter the parameters and press “Calculate”.</p>
+    </section>
+
+    <section id="services" class="wrap">
+      <h2 data-i18n="services_title">Services</h2>
+      <div class="grid">
+        <article class="card">
+          <h3 data-i18n="s1t">Road freight</h3>
+          <p data-i18n="s1d">Full-truck and groupage shipments with live tracking.</p>
+        </article>
+        <article class="card">
+          <h3 data-i18n="s2t">Air freight</h3>
+          <p data-i18n="s2d">Urgent deliveries for time-critical cargo.</p>
+        </article>
+        <article class="card">
+          <h3 data-i18n="s3t">Customs clearance</h3>
+          <p data-i18n="s3d">Paperwork and brokerage support door to door.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="contacts" class="wrap card">
+      <h2 data-i18n="contacts_title">Contacts</h2>
+      <p data-i18n="contacts_text">Write to us — we reply within one business day.</p>
+      <ul class="contact-list">
+        <li><span data-i18n="email_label">Email</span>: <a href="mailto:info@example.com">info@example.com</a></li>
+        <li><span data-i18n="phone_label">Phone</span>: <a href="tel:+10005550100">+1 (000) 555-0100</a></li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p data-i18n="footer_rights">© 2026 Hexlock Trade Group. All rights reserved.</p>
+    </div>
+  </footer>
+</body>
+</html>
