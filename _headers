@@ -2,7 +2,7 @@
 # If your host does not support this file, configure the same headers there.
 # The HTML also ships a Content-Security-Policy fallback meta tag, but
 # frame protection and the headers below require real HTTP response headers.
-/
+/*
   Content-Security-Policy: default-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; upgrade-insecure-requests
   Referrer-Policy: strict-origin-when-cross-origin
   X-Content-Type-Options: nosniff
