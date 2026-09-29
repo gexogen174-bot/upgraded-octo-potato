@@ -485,14 +485,18 @@
     padding:.3rem .55rem;
     border-radius:3px;
     cursor:pointer;
+    text-decoration:none;
+    display:inline-block;
     transition: border-color .15s ease, color .15s ease, background .15s ease;
   }
   .lang-btn:hover{ border-color: var(--accent); color: var(--accent-bright); }
-  .lang-btn[aria-pressed="true"]{
+  .lang-btn[aria-pressed="true"],
+  .lang-btn.is-active{
     background: var(--accent-soft);
     border-color: var(--accent);
     color: var(--text);
   }
+  span.lang-btn{ cursor:default; }
   @media (max-width: 960px){
     .lang-switcher{
       width:100%;

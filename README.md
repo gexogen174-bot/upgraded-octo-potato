@@ -1,10 +1,10 @@
 # Hexlock Trade Group
 
-Single-file design shipped as a hardened static site: `index.html` + `styles.css` + `i18n.js` + `app.js`. No application server, database, or third-party code.
+Static multilingual site with one standalone page per language: `index.html` (RU) + `en/` + `zh/` + `es/`, shared `styles.css` + `app.js`. No application server, database, or third-party code.
 
 ## Languages
 
-Russian (default), English, Chinese (Simplified) and Spanish. The switcher in the header persists the choice (`localStorage`), honors `?lang=`, and falls back to the browser language. All strings live in `i18n.js` and are rendered via `textContent` / `placeholder` / `aria-label` only.
+Russian at `/` (default), English at `/en/`, Chinese (Simplified) at `/zh/`, Spanish at `/es/`. Each page carries its own static copy (no client-side dictionary, no `localStorage`, no `?lang=`). The header switcher is plain links (`/` `/en/` `/zh/` `/es/`) with `aria-current="page"` on the active language. SEO: per-page canonical + `og:*`, shared `hreflang` block (ru/en/zh/es/x-default), `sitemap.xml`, `robots.txt`.
 
 ## Security
 
@@ -14,4 +14,4 @@ Russian (default), English, Chinese (Simplified) and Spanish. The switcher in th
 
 ## Develop
 
-Run locally with `npm run dev` (Python 3 required). Run `npm test` for locale parity and hardening regression tests. Serve over HTTPS in production for HSTS to take effect.
+Run locally with `npm run dev` (Python 3 required), then open `/`, `/en/`, `/zh/`, `/es/`. Run `npm test` for static-page parity (lang/title/copy/switcher/SEO), sitemap/robots, and hardening regression tests. Serve over HTTPS in production for HSTS to take effect.
