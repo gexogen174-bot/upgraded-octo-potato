@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Allow: /en/
+Allow: /zh/
+Allow: /es/
+
+Sitemap: https://hexlock.pro/sitemap.xml

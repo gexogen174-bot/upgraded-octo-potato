@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://hexlock.pro/</loc>
+    <lastmod>2026-09-29</lastmod>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://hexlock.pro/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://hexlock.pro/en/"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://hexlock.pro/zh/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://hexlock.pro/es/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://hexlock.pro/"/>
+  </url>
+  <url>
+    <loc>https://hexlock.pro/en/</loc>
+    <lastmod>2026-09-29</lastmod>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://hexlock.pro/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://hexlock.pro/en/"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://hexlock.pro/zh/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://hexlock.pro/es/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://hexlock.pro/"/>
+  </url>
+  <url>
+    <loc>https://hexlock.pro/zh/</loc>
+    <lastmod>2026-09-29</lastmod>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://hexlock.pro/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://hexlock.pro/en/"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://hexlock.pro/zh/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://hexlock.pro/es/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://hexlock.pro/"/>
+  </url>
+  <url>
+    <loc>https://hexlock.pro/es/</loc>
+    <lastmod>2026-09-29</lastmod>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://hexlock.pro/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://hexlock.pro/en/"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://hexlock.pro/zh/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://hexlock.pro/es/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://hexlock.pro/"/>
+  </url>
+</urlset>
