@@ -107,6 +107,20 @@ for (const a of ['Allow: /', 'Allow: /en/', 'Allow: /zh/', 'Allow: /es/']) {
   assert.ok(robots.includes(a), `robots missing ${a}`);
 }
 
+// Brand assets: favicons, share image, header mark (self-hosted, CSP-safe).
+for (const f of ['favicon.svg', 'favicon-32x32.png', 'apple-touch-icon.png', 'logo-mark.png', 'og-image.png']) {
+  assert.ok(fs.existsSync(path.join(root, f)), `${f} missing`);
+}
+for (const [code, src] of Object.entries(html)) {
+  const up = code === 'ru' ? '' : '../';
+  assert.ok(src.includes(`<link rel="icon" type="image/svg+xml" href="${up}favicon.svg">`), `${code}: svg favicon`);
+  assert.ok(src.includes(`href="${up}favicon-32x32.png"`), `${code}: png favicon`);
+  assert.ok(src.includes(`href="${up}apple-touch-icon.png"`), `${code}: apple touch icon`);
+  assert.ok(src.includes('<meta property="og:image" content="https://hexlock.pro/og-image.png">'), `${code}: og:image`);
+  assert.ok(src.includes('<meta name="twitter:card" content="summary_large_image">'), `${code}: twitter card`);
+  assert.ok(src.includes(`<img class="brand-mark" src="${up}logo-mark.png"`), `${code}: header logo`);
+}
+
 // Responsive guards preserved.
 assert.ok(html.ru.includes('width=device-width'), 'viewport');
 assert.ok(css.includes('-webkit-text-size-adjust'), 'text-size guard');
