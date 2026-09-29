@@ -1,48 +1,19 @@
 'use strict';
-/* Hexlock Trade Group — language switcher + page interactions.
+/* Hexlock Trade Group — page interactions (static multilingual build).
    Only same-origin static scripts run (see CSP). All user input is
    treated as hostile: length caps, encodeURIComponent mailto links,
    validated fact indexes, and textContent-only rendering. */
 (function () {
-  var LOCALES = ['ru', 'en', 'zh', 'es'];
-  var FALLBACK = 'ru';
-  var STORE_KEY = 'hexlock-lang';
+  var FACTS = {"ru": ["Проверяем репутацию и возможности каждого завода перед сделкой", "Ведём сделку от первого запроса до получения товара на складе", "Работаем с заводами и покупателями в разных странах", "Прозрачные расчёты — без скрытых комиссий", "Личный контакт с командой на каждом этапе, а не колл-центр", "Берём на себя таможенное оформление и маршрут доставки"], "en": ["We check the reputation and capabilities of every factory before the deal", "We manage the deal from the first request to goods arriving at your warehouse", "We work with factories and buyers in different countries", "Transparent pricing — no hidden fees", "A direct line to the team at every step, not a call centre", "We take care of customs clearance and the delivery route"], "zh": ["在交易前核查每家工厂的信誉与实力", "从首次询盘到货物入库，全程跟进交易", "与不同国家的工厂和买家合作", "价格透明——无隐藏费用", "每个环节直接对接团队，而非呼叫中心", "负责清关与运输路线安排"], "es": ["Verificamos la reputación y la capacidad de cada fábrica antes del acuerdo", "Gestionamos el acuerdo desde la primera solicitud hasta la recepción en el almacén", "Trabajamos con fábricas y compradores de distintos países", "Cálculos transparentes, sin comisiones ocultas", "Contacto directo con el equipo en cada etapa, no un centro de llamadas", "Asumimos el despacho aduanero y la ruta de entrega"]};
+  var MAIL = {"ru": {"mail_subject": "Запрос на расчёт логистики — Hexlock", "mail_line": "Запрос на расчёт стоимости логистики:", "mail_cat": "Категория товара", "mail_vol": "Объём партии", "mail_origin": "Страна отправления", "mail_dest": "Страна назначения", "mail_comment": "Комментарий"}, "en": {"mail_subject": "Logistics quote request — Hexlock", "mail_line": "Logistics cost estimate request:", "mail_cat": "Goods category", "mail_vol": "Batch volume", "mail_origin": "Country of origin", "mail_dest": "Destination country", "mail_comment": "Comment"}, "zh": {"mail_subject": "物流报价请求 — Hexlock", "mail_line": "物流费用估算请求：", "mail_cat": "产品类别", "mail_vol": "批量", "mail_origin": "发货国家", "mail_dest": "目的国家", "mail_comment": "备注"}, "es": {"mail_subject": "Solicitud de cálculo logístico — Hexlock", "mail_line": "Solicitud de cálculo del costo logístico:", "mail_cat": "Categoría de la mercancía", "mail_vol": "Volumen del lote", "mail_origin": "País de origen", "mail_dest": "País de destino", "mail_comment": "Comentario"}};
   var FACT_COUNT = 6;
   var MAX_SHORT = 200;
   var MAX_COMMENT = 1000;
 
-  function dicts() {
-    return (window.I18N && window.I18N.STRINGS) || {};
-  }
-
-  function isLocale(value) {
-    return LOCALES.indexOf(value) !== -1;
-  }
-
-  function detectLang() {
-    try {
-      var fromUrl = new URLSearchParams(window.location.search).get('lang');
-      if (isLocale(fromUrl)) return fromUrl;
-    } catch (e) { /* URL API unavailable: ignore */ }
-    try {
-      var stored = window.localStorage.getItem(STORE_KEY);
-      if (isLocale(stored)) return stored;
-    } catch (e) { /* storage blocked: ignore */ }
-    var nav = String((typeof navigator !== 'undefined' && navigator.language) || FALLBACK).toLowerCase();
-    if (nav.indexOf('zh') === 0) return 'zh';
-    if (nav.indexOf('en') === 0) return 'en';
-    if (nav.indexOf('es') === 0) return 'es';
-    return 'ru';
-  }
-
-  var current = detectLang();
-
-  function t(key) {
-    var d = dicts();
-    if (d[current] && typeof d[current][key] === 'string') return d[current][key];
-    if (d[FALLBACK] && typeof d[FALLBACK][key] === 'string') return d[FALLBACK][key];
-    return '';
-  }
+  /* Page language comes from <html lang>; set statically per page. */
+  var lang = document.documentElement.getAttribute('lang') || 'ru';
+  if (!FACTS[lang]) lang = 'ru';
+  var mail = MAIL[lang] || MAIL.ru;
 
   function cap(value, max) {
     var s = String(value == null ? '' : value);
@@ -51,49 +22,11 @@
 
   var factText = null;
 
-  function applyLang(lang) {
-    if (!isLocale(lang)) return;
-    current = lang;
-    var strings = dicts()[lang] || {};
-    document.documentElement.setAttribute('lang', lang);
-    var nodes = document.querySelectorAll('[data-i18n]');
-    for (var i = 0; i < nodes.length; i++) {
-      var key = nodes[i].getAttribute('data-i18n');
-      if (typeof strings[key] === 'string') nodes[i].textContent = strings[key];
-    }
-    var phs = document.querySelectorAll('[data-i18n-ph]');
-    for (var p = 0; p < phs.length; p++) {
-      var pk = phs[p].getAttribute('data-i18n-ph');
-      if (typeof strings[pk] === 'string') phs[p].setAttribute('placeholder', strings[pk]);
-    }
-    var arias = document.querySelectorAll('[data-i18n-aria]');
-    for (var a = 0; a < arias.length; a++) {
-      var ak = arias[a].getAttribute('data-i18n-aria');
-      if (typeof strings[ak] === 'string') arias[a].setAttribute('aria-label', strings[ak]);
-    }
-    var metas = document.querySelectorAll('[data-i18n-content]');
-    for (var m = 0; m < metas.length; m++) {
-      var mk = metas[m].getAttribute('data-i18n-content');
-      if (typeof strings[mk] === 'string') metas[m].setAttribute('content', strings[mk]);
-    }
-    if (typeof strings.meta_title === 'string') document.title = strings.meta_title;
-    var buttons = document.querySelectorAll('[data-lang-btn]');
-    for (var b = 0; b < buttons.length; b++) {
-      buttons[b].setAttribute(
-        'aria-pressed',
-        buttons[b].getAttribute('data-lang-btn') === lang ? 'true' : 'false'
-      );
-    }
-    try {
-      window.localStorage.setItem(STORE_KEY, lang);
-    } catch (e) { /* storage blocked: language just won't persist */ }
-    if (factText) factText.textContent = t('fact_0');
-  }
-
   function setActive(i) {
     if (!factText) return;
     if (i < 0 || i >= FACT_COUNT) return;
-    var text = t('fact_' + i);
+    var text = (FACTS[lang] || FACTS.ru)[i];
+    if (typeof text !== 'string') return;
     factText.style.opacity = 0;
     setTimeout(function () {
       factText.textContent = text;
@@ -102,19 +35,6 @@
   }
 
   function init() {
-    var buttons = document.querySelectorAll('[data-lang-btn]');
-    for (var i = 0; i < buttons.length; i++) {
-      buttons[i].addEventListener('click', function (event) {
-        applyLang(event.currentTarget.getAttribute('data-lang-btn'));
-        var navEl = document.getElementById('siteNav');
-        var toggleEl = document.getElementById('navToggle');
-        if (navEl && toggleEl && navEl.classList.contains('is-open')) {
-          navEl.classList.remove('is-open');
-          toggleEl.setAttribute('aria-expanded', 'false');
-        }
-      });
-    }
-
     var toggle = document.getElementById('navToggle');
     var nav = document.getElementById('siteNav');
     if (toggle && nav) {
@@ -177,19 +97,17 @@
         var origin = cap(document.getElementById('calcOrigin').value, MAX_SHORT).trim();
         var destination = cap(document.getElementById('calcDestination').value, MAX_SHORT).trim();
         var comment = cap(document.getElementById('calcComment').value, MAX_COMMENT).trim();
-        var lines = [t('mail_line'), ''];
-        if (category) lines.push(t('mail_cat') + ': ' + category);
-        if (volume) lines.push(t('mail_vol') + ': ' + volume);
-        if (origin) lines.push(t('mail_origin') + ': ' + origin);
-        if (destination) lines.push(t('mail_dest') + ': ' + destination);
-        if (comment) lines.push(t('mail_comment') + ': ' + comment);
+        var lines = [mail.mail_line, ''];
+        if (category) lines.push(mail.mail_cat + ': ' + category);
+        if (volume) lines.push(mail.mail_vol + ': ' + volume);
+        if (origin) lines.push(mail.mail_origin + ': ' + origin);
+        if (destination) lines.push(mail.mail_dest + ': ' + destination);
+        if (comment) lines.push(mail.mail_comment + ': ' + comment);
         var body = lines.join('\n');
         window.location.href = 'mailto:info@hexlock.pro?subject=' +
-          encodeURIComponent(t('mail_subject')) + '&body=' + encodeURIComponent(body);
+          encodeURIComponent(mail.mail_subject) + '&body=' + encodeURIComponent(body);
       });
     }
-
-    applyLang(current);
   }
 
   if (document.readyState === 'loading') {
