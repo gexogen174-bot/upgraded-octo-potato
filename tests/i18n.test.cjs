@@ -108,11 +108,13 @@ for (const a of ['Allow: /', 'Allow: /en/', 'Allow: /zh/', 'Allow: /es/']) {
 }
 
 // Brand assets: favicons, share image, header mark (self-hosted, CSP-safe).
-for (const f of ['favicon.svg', 'favicon-32x32.png', 'apple-touch-icon.png', 'logo-mark.png', 'og-image.png']) {
+for (const f of ['favicon.svg', 'favicon-32x32.png', 'favicon-192x192.png', 'apple-touch-icon.png', 'logo-mark.png', 'og-image.png']) {
   assert.ok(fs.existsSync(path.join(root, f)), `${f} missing`);
 }
 for (const [code, src] of Object.entries(html)) {
   const up = code === 'ru' ? '' : '../';
+  assert.ok(src.includes(`<link rel="icon" type="image/png" sizes="192x192" href="${up}favicon-192x192.png">`), `${code}: search favicon first`);
+  assert.ok(src.indexOf('favicon-192x192.png') < src.indexOf('favicon.svg'), `${code}: png favicon before svg`);
   assert.ok(src.includes(`<link rel="icon" type="image/svg+xml" href="${up}favicon.svg">`), `${code}: svg favicon`);
   assert.ok(src.includes(`href="${up}favicon-32x32.png"`), `${code}: png favicon`);
   assert.ok(src.includes(`href="${up}apple-touch-icon.png"`), `${code}: apple touch icon`);
