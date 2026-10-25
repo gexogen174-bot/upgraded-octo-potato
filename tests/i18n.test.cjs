@@ -131,4 +131,12 @@ for (const need of ['max-width: 960px', 'max-width: 400px', 'pointer: coarse']) 
   assert.ok(css.includes(need), `css must cover ${need}`);
 }
 
+// Yandex Webmaster verification file must ship with every build, unlinked and unlisted.
+const YANDEX = 'yandex_7b7486b213ccdaca.html';
+assert.ok(fs.readFileSync(path.join(root, YANDEX), 'utf8').includes('Verification: 7b7486b213ccdaca'), 'yandex verification file');
+for (const rel of ['sitemap.xml', 'robots.txt', ...Object.values(PAGES)]) {
+  assert.ok(!fs.readFileSync(path.join(root, rel), 'utf8').includes(YANDEX), `${rel}: must not expose ${YANDEX}`);
+}
+assert.ok(fs.readFileSync(path.join(root, '_headers'), 'utf8').includes(`/${YANDEX}\n  X-Robots-Tag: noindex`), 'yandex file noindex header');
+
 console.log('OK: 4 static locale pages, link switcher, SEO companions, hardened shell.');
