@@ -10,3 +10,8 @@
   Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
   Cross-Origin-Opener-Policy: same-origin
+
+# Yandex Webmaster verification file: must stay publicly reachable,
+# but keep it out of search results.
+/yandex_7b7486b213ccdaca.html
+  X-Robots-Tag: noindex, nofollow

@@ -15,3 +15,7 @@ Russian at `/` (default), English at `/en/`, Chinese (Simplified) at `/zh/`, Spa
 ## Develop
 
 Run locally with `npm run dev` (Python 3 required), then open `/`, `/en/`, `/zh/`, `/es/`. Run `npm test` for static-page parity (lang/title/copy/switcher/SEO), sitemap/robots, and hardening regression tests. Serve over HTTPS in production for HSTS to take effect.
+
+## Yandex verification
+
+`yandex_7b7486b213ccdaca.html` confirms site ownership in Yandex Webmaster and must stay in the site root of every deploy. It is not linked from pages, `sitemap.xml` or `robots.txt`, and `_headers` serves it with `X-Robots-Tag: noindex`. `npm test` fails if it goes missing.
